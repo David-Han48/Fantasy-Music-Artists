@@ -10,10 +10,10 @@
 | Captain     |  dlhan2@illinois.edu   |
 | Member1     |        Chris Nee       |
 | Member1     |   cnee2@illinois.edu   |
-| Member2     |                        |
-| Member2     |                        |
-| Member3     |                        |
-| Member3     |                        |
+| Member2     |        Cyrus Ye        |
+| Member2     |   cye16@illinois.edu   |
+| Member3     |       Shreyes Bharat   |
+| Member3     |  sbharat2@illinois.edu |
 
 ## Project Information
 
