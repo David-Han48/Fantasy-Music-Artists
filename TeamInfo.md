@@ -19,10 +19,10 @@
 
 |   Info      |        Description     |
 | ----------- | ---------------------- |
-|  Title      |       ProjectTitle     |
+|  Title      |     Fantasy Spotify    |
 | System URL  |      link_to_system    |
 | Video Link  |      link_to_video     |
 
 ## Project Summary
 
-This is a summary of the project!
+We develop a game similar to Fantasy Football but for Spotify artists. Each artist will have a price that you can sign them. Users will be given a “budget” of 100 million to sign 5 artists. Every month, we assign points for each artist based on Spotify performance and users get however many points their chosen artists earned. 
