@@ -1,15 +1,10 @@
----
-title: Database Design - Stage 3
-
----
-
 # Database Design - Stage 3
 
 # 1, Create Table
 GCP Connection and databases:
-![image](https://hackmd.io/_uploads/Skdf7zca1x.png)
+![alt text](image.png)
 
-![Screenshot 2025-04-01 at 18.12.07](https://hackmd.io/_uploads/B1JeXe5aJl.png)
+![alt text](image-1.png)
 
 ## 1. League Table
 
@@ -75,7 +70,7 @@ CREATE TABLE ArtistStats (
 );
 ```
 # 2, Insert Data
-![count](https://hackmd.io/_uploads/H15PMe5Tke.png)
+![alt text](image-2.png)
 
 
 # 3, Advanced query
@@ -100,7 +95,7 @@ FROM (
 WHERE rank_in_league <= 1
 LIMIT 15;
 ```
-![Screenshot 2025-04-01 at 18.15.27](https://hackmd.io/_uploads/rygoq7x5a1x.png)
+![alt text](image-3.png)
 
 ## 2, Average Listeners and Price for Each Artist (Jan–Mar 2025)
 ```sql
@@ -114,7 +109,7 @@ WHERE (s.year = 2025 AND s.month BETWEEN 1 AND 3)
 GROUP BY a.artistId
 LIMIT 15;
 ```
-![Screenshot 2025-04-01 at 18.15.45](https://hackmd.io/_uploads/SJRj7eq61g.png)
+![alt text](image-4.png)
 
 ## 3, Artists Owned by a Specific Player Across All Rosters (Take Player 11 for example)
 
@@ -131,7 +126,7 @@ WHERE a.artistId IN (
 LIMIT 15;
 
 ```
-![Screenshot 2025-04-01 at 18.21.07](https://hackmd.io/_uploads/BJ4ZHl5a1l.png)
+![alt text](image-5.png)
 
 **The output only have 2 lines because Player11 only have 2 artists across all rosters**
 
@@ -158,22 +153,22 @@ ORDER BY price_increase DESC
 LIMIT 15;
 
 ```
-![Screenshot 2025-04-01 at 18.43.07](https://hackmd.io/_uploads/rkdf5e5pye.png)
+![alt text](image-6.png)
 
 
 
 ## 5, Index analysis
 Query 1 before indexing:
-![image](https://hackmd.io/_uploads/ByOFWb56Je.png)
+![alt text](image-7.png)
 
 Query 2 before indexing:
-![image](https://hackmd.io/_uploads/BJ52WW5pkx.png)
+![alt text](image-8.png)
 
 Query 3 before indexing:
-![image](https://hackmd.io/_uploads/B1ly7W9ayx.png)
+![alt text](image-9.png)
 
 Query 4 before indexing:
-![image](https://hackmd.io/_uploads/rJXlVZqp1l.png)
+![alt text](image-10.png)
 
 
 
