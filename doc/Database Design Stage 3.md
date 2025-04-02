@@ -179,20 +179,52 @@ CREATE INDEX idx_roster_league_player_points ON Roster(leagueId, playerId, point
 CREATE INDEX idx_roster_league_player ON Roster(leagueId, playerId);
 CREATE INDEX idx_player_playerId ON Player(playerId);
 ```
+Indexing 1
+![alt text](image-11.png)
+
+
+
+Indexing 2
+![alt text](image-12.png)
+
+
+Indexing 3
+![alt text](image-13.png)
+
 
 Query 2:
 ```sql=
 CREATE INDEX idx_artiststats_year_month_artistid ON ArtistStats(year, month, artistId);
 CREATE INDEX idx_artist_artistid ON Artist(artistId);
-CREATE INDEX idx_artist_artistid ON Artist(artistId);
+CREATE INDEX idx_artiststats_covering ON ArtistStats(artistId, year, month, listeners, price);
 ```
+Indexing 1
+![alt text](image-14.png)
+
+Indexing 2
+![alt text](image-15.png)
+
+Indexing 3
+![alt text](image-16.png)
+
 
 Query 3:
 ```sql=
 CREATE INDEX idx_rostermember_rosterid ON RosterMember(rosterId);
-CREATE INDEX idx_roster_playerid ON Roster(playerId);
+CREATE INDEX idx_rostermember_artistId ON RosterMember(artistId);
 CREATE INDEX idx_rostermember_covering ON RosterMember(rosterId, artistId);
 ```
+Indexing 1
+![alt text](image-17.png)
+
+Indexing 2
+
+![alt text](image-18.png)
+
+Indexing 3
+
+![alt text](image-19.png)
+
 
 Query 4:
 ```sql=
@@ -201,11 +233,24 @@ CREATE INDEX idx_artiststats_covering ON ArtistStats(artistId, year, month, pric
 CREATE INDEX idx_artist_artistid ON Artist(artistId);
 ```
 
-Unfortunately, none of these indexes improved query performance for any query. Below are explanation for possible reasons why this happened.
+Indexing 1
+![alt text](image-20.png)
+
+Indexing 2
+![alt text](image-21.png)
+
+Indexing 3
+![alt text](image-22.png)
+
+
+
+Unfortunately, none of these indexes improved query performance for any query. (Index 2 of Query 2 even made performance significantly worse) Below are explanation for possible reasons why this happened.
 
 None of the above indexing we tried improved the performance of query 1. This is likely due to query 1 involving SUM(), which means the query needs to go through all values even if it is sorted. The DENSE_RANK() function is ordered by SUM(), so it is also bottlenecked by it.
 
 Query 2's performance also cannot be improved by indexing for a reason similar to query 1. Notice that it requires finding the average, which means all relevant values must be processed and sorting does not help with that.
+
+Also, interestingly, Index 2 (`year, month, artistId`) made performance significantly worse, increasing cost due to poor selectivity and inefficient access paths. Only the covering index slightly improved performance, but the gain was negligible. Since aggregation requires scanning all matching rows anyway, indexing offered minimal benefit.
 
 Query 3's performance was also not improved by indexing. This is likely due to the database having to resolve the subquery entirely first. Indexing is generally helpful for DISTINCT but it is again only used after the subquery, so indexing is not too useful here.
 
