@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask_mysql import MySQL
+from flask_mysqldb import MySQL
 from flask_cors import CORS
 import os
 from config import Config
@@ -25,3 +25,6 @@ def create_player():
     mysql.connection.commit()
 
     return jsonify({"message": "Player account created successfully!"})
+
+if __name__ == '__main__':
+    app.run(debug=True)

@@ -1,8 +1,8 @@
 import os
 
 class Config:
-    MYSQL_HOST = os.getenv("MYSQL_HOST", "your-host")
-    MYSQL_USER = os.getenv("MYSQL_USER", "cs411")
+    MYSQL_HOST = os.getenv("MYSQL_HOST", "34.29.70.228")
+    MYSQL_USER = os.getenv("MYSQL_USER", "root")
     MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "cs411sucksass")
-    MYSQL_DB = os.getenv("MYSQL_DB", "your-database-name")
+    MYSQL_DB = os.getenv("MYSQL_DB", "cs411-spotify")
     MYSQL_CURSORCLASS = 'DictCursor'
