@@ -303,64 +303,105 @@ def leave_league(league_id):
     
     cursor = mysql.connection.cursor()
     
-    cursor.execute("SELECT * FROM League WHERE leagueId = %s", (league_id,))
-    league = cursor.fetchone()
-    if not league:
-        return jsonify({"error": "League not found"}), 404
-    
-    cursor.execute("SELECT * FROM Roster WHERE playerId = %s AND leagueId = %s", (player_id, league_id))
-    rosters = cursor.fetchall()
-    
-    if not rosters:
-        return jsonify({"error": "Player is not in this league"}), 404
-    
     try:
         cursor.execute("START TRANSACTION")
         
-        for roster in rosters:
-            cursor.execute("DELETE FROM RosterMember WHERE rosterId = %s", (roster['rosterId'],))
+        # Check if league exists
+        cursor.execute("SELECT * FROM League WHERE leagueId = %s", (league_id,))
+        league = cursor.fetchone()
+        if not league:
+            return jsonify({"error": "League not found"}), 404
+        
+        # Check if player is in the league
+        cursor.execute("SELECT * FROM Roster WHERE playerId = %s AND leagueId = %s", (player_id, league_id))
+        rosters = cursor.fetchall()
+        
+        if not rosters:
+            return jsonify({"error": "Player is not in this league"}), 404
+        
+        # If the player is the owner, delete all rosters in the league
+        if league['ownerId'] == player_id:
+            # Delete all roster members in the league
+            cursor.execute("""
+                DELETE rm FROM RosterMember rm
+                JOIN Roster r ON rm.rosterId = r.rosterId
+                WHERE r.leagueId = %s
+            """, (league_id,))
             
-        cursor.execute("DELETE FROM Roster WHERE playerId = %s AND leagueId = %s", (player_id, league_id))
-        
-        cursor.execute("UPDATE League SET playerCount = playerCount - 1 WHERE leagueId = %s", (league_id,))
-        
-        if league['ownerId'] == player_id and league['playerCount'] > 1:
+            # Delete all rosters in the league
+            cursor.execute("DELETE FROM Roster WHERE leagueId = %s", (league_id,))
+            
+            # If there are other players, transfer ownership to the first player
             cursor.execute("""
                 SELECT r.playerId 
                 FROM Roster r 
-                WHERE r.leagueId = %s AND r.playerId != %s 
+                WHERE r.leagueId = %s 
                 LIMIT 1
-            """, (league_id, player_id))
+            """, (league_id,))
             new_owner = cursor.fetchone()
+            
             if new_owner:
                 cursor.execute("UPDATE League SET ownerId = %s WHERE leagueId = %s", 
                              (new_owner['playerId'], league_id))
-        elif league['playerCount'] <= 1:
-            cursor.execute("DELETE FROM League WHERE leagueId = %s", (league_id,))
+            else:
+                # If no players remain, delete the league
+                cursor.execute("DELETE FROM League WHERE leagueId = %s", (league_id,))
+        else:
+            # If the player is not the owner, delete only their rosters
+            cursor.execute("""
+                DELETE rm FROM RosterMember rm
+                JOIN Roster r ON rm.rosterId = r.rosterId
+                WHERE r.playerId = %s AND r.leagueId = %s
+            """, (player_id, league_id))
             
+            cursor.execute("DELETE FROM Roster WHERE playerId = %s AND leagueId = %s", 
+                         (player_id, league_id))
+        
+        # Update league player count
+        cursor.execute("UPDATE League SET playerCount = playerCount - 1 WHERE leagueId = %s", (league_id,))
+        
         mysql.connection.commit()
+        
+        return jsonify({"message": "Successfully left the league!"})
+        
     except Exception as e:
         mysql.connection.rollback()
         return jsonify({"error": str(e)}), 500
-    
-    cursor.close()
-    
-    return jsonify({"message": "Successfully left the league!"})
+    finally:
+        cursor.close()
 
 @app.route('/api/standings/<int:league_id>', methods=['GET'])
 def get_standings(league_id):
     cursor = mysql.connection.cursor()
     
-    cursor.execute("SELECT * FROM League WHERE leagueId = %s", (league_id,))
-    league = cursor.fetchone()
-    if not league:
-        return jsonify({"error": "League not found"}), 404
-    
-    cursor.callproc('GetLeagueStandings', [league_id])
-    standings = cursor.fetchall()
-    cursor.close()
-    
-    return jsonify(standings)
+    try:
+        # Verify league exists
+        cursor.execute("SELECT * FROM League WHERE leagueId = %s", (league_id,))
+        league = cursor.fetchone()
+        if not league:
+            return jsonify({"error": "League not found"}), 404
+        
+        # Get current standings with points
+        cursor.execute("""
+            SELECT 
+                p.playerId,
+                p.playerName,
+                r.points,
+                r.rosterId
+            FROM Roster r
+            JOIN Player p ON r.playerId = p.playerId
+            WHERE r.leagueId = %s
+            ORDER BY r.points DESC
+        """, (league_id,))
+        
+        standings = cursor.fetchall()
+        
+        return jsonify(standings)
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
 
 
 @app.route('/api/rosters', methods=['GET'])
@@ -568,30 +609,30 @@ def get_artist(artist_id):
         current_year = date_settings['current_year']
         
         # Get artist with current month's stats
-        #advanced #2
+        # Advanced #1
         cursor.execute("""
-    SELECT 
-        a.artistId, 
-        a.artistName, 
-        s.price, 
-        s.listeners, 
-        s.followers, 
-        s.popularity,
-        s.month,
-        s.year
-    FROM Artist a
-    JOIN (
-        SELECT 
-            s.*,
-            RANK() OVER (PARTITION BY artistId ORDER BY year DESC, month DESC) as recency_rank
-        FROM ArtistStats s
-        WHERE s.artistId = %s
-    ) s ON a.artistId = s.artistId
-    WHERE a.artistId = %s
-      AND s.month = %s
-      AND s.year = %s
-      AND s.recency_rank = 1  -- Still gets same row as original
-""", (artist_id, artist_id, current_month, current_year))
+            SELECT 
+            a.artistId, 
+            a.artistName, 
+            s.price, 
+            s.listeners, 
+            s.followers, 
+            s.popularity,
+            s.month,
+            s.year
+        FROM Artist a
+        JOIN (
+            SELECT 
+                s.*,
+                RANK() OVER (PARTITION BY artistId ORDER BY year DESC, month DESC) as recency_rank
+            FROM ArtistStats s
+            WHERE s.artistId = %s
+        ) s ON a.artistId = s.artistId
+        WHERE a.artistId = %s
+        AND s.month = %s
+        AND s.year = %s
+        AND s.recency_rank = 1  -- Still gets same row as original
+    """, (artist_id, artist_id, current_month, current_year))
         
         artist = cursor.fetchone()
         
@@ -627,34 +668,34 @@ def get_roster_artists(roster_id):
         return jsonify({"error": "Roster not found"}), 404
         
     # Get artists with stats for CURRENT month/year
-    #advanced #2
+    # Advanced #2
     cursor.execute("""
-    SELECT 
-        a.artistId, 
-        a.artistName, 
-        s.price, 
-        s.listeners, 
-        s.followers, 
-        s.popularity,
-        s.month,
-        s.year
-    FROM Artist a
-    JOIN ArtistStats s ON a.artistId = s.artistId
-    WHERE EXISTS (
-        SELECT 1 FROM RosterMember rm 
-        WHERE rm.rosterId = %s 
-        AND rm.artistId = a.artistId
-    )
-    AND s.month = %s
-    AND s.year = %s
-    AND a.artistId IN (
-        SELECT artistId 
-        FROM RosterMember 
-        WHERE rosterId = %s
-        GROUP BY artistId
-        HAVING COUNT(*) = 1  -- Ensures no duplicates
-    )
-""", (roster_id, current_month, current_year, roster_id))
+        SELECT 
+            a.artistId, 
+            a.artistName, 
+            s.price, 
+            s.listeners, 
+            s.followers, 
+            s.popularity,
+            s.month,
+            s.year
+        FROM Artist a
+        JOIN ArtistStats s ON a.artistId = s.artistId
+        WHERE EXISTS (
+            SELECT 1 FROM RosterMember rm 
+            WHERE rm.rosterId = %s 
+            AND rm.artistId = a.artistId
+        )
+        AND s.month = %s
+        AND s.year = %s
+        AND a.artistId IN (
+            SELECT artistId 
+            FROM RosterMember 
+            WHERE rosterId = %s
+            GROUP BY artistId
+            HAVING COUNT(*) = 1  -- Ensures no duplicates
+        )
+    """, (roster_id, current_month, current_year, roster_id))
     
     artists = cursor.fetchall()
     cursor.close()

@@ -5,13 +5,14 @@ const LeagueManagement = ({ userId, username }) => {
   const [leagues, setLeagues] = useState([]);
   const [selectedLeague, setSelectedLeague] = useState(null);
   const [newLeagueName, setNewLeagueName] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState({
+    leagues: true,
+    standings: false,
+    actions: false
+  });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [leagueStandings, setLeagueStandings] = useState([]);
-  const [isJoining, setIsJoining] = useState(false);
-  const [isLeaving, setIsLeaving] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     fetchLeagues();
@@ -19,7 +20,7 @@ const LeagueManagement = ({ userId, username }) => {
 
   const fetchLeagues = async () => {
     try {
-      setLoading(true);
+      setLoading(prev => ({ ...prev, leagues: true }));
       setError('');
       const response = await fetch('http://localhost:5000/api/leagues');
       
@@ -33,13 +34,14 @@ const LeagueManagement = ({ userId, username }) => {
       setError('Error fetching leagues: ' + err.message);
       console.error('Error:', err);
     } finally {
-      setLoading(false);
+      setLoading(prev => ({ ...prev, leagues: false }));
     }
   };
 
   const fetchLeagueStandings = async (leagueId) => {
     try {
-      setLoading(true);
+      setLoading(prev => ({ ...prev, standings: true }));
+      setError('');
       const response = await fetch(`http://localhost:5000/api/standings/${leagueId}`);
       
       if (!response.ok) {
@@ -52,7 +54,7 @@ const LeagueManagement = ({ userId, username }) => {
       setError('Error fetching league standings: ' + err.message);
       console.error('Error:', err);
     } finally {
-      setLoading(false);
+      setLoading(prev => ({ ...prev, standings: false }));
     }
   };
 
@@ -72,7 +74,7 @@ const LeagueManagement = ({ userId, username }) => {
     }
 
     try {
-      setIsCreating(true);
+      setLoading(prev => ({ ...prev, actions: true }));
       const response = await fetch('http://localhost:5000/api/leagues', {
         method: 'POST',
         headers: {
@@ -97,7 +99,7 @@ const LeagueManagement = ({ userId, username }) => {
       setError(err.message || 'Failed to create league');
       console.error('Error:', err);
     } finally {
-      setIsCreating(false);
+      setLoading(prev => ({ ...prev, actions: false }));
     }
   };
 
@@ -105,7 +107,7 @@ const LeagueManagement = ({ userId, username }) => {
     e.stopPropagation();
     
     try {
-      setIsJoining(true);
+      setLoading(prev => ({ ...prev, actions: true }));
       setError('');
       const response = await fetch(`http://localhost:5000/api/leagues/${leagueId}/join`, {
         method: 'POST',
@@ -134,49 +136,7 @@ const LeagueManagement = ({ userId, username }) => {
       setError(err.message || 'Failed to join league');
       console.error('Error:', err);
     } finally {
-      setIsJoining(false);
-    }
-  };
-
-  const handleLeaveLeague = async (leagueId, e) => {
-    e.stopPropagation();
-    
-    if (!window.confirm('Are you sure you want to leave this league?')) {
-      return;
-    }
-
-    try {
-      setIsLeaving(true);
-      setError('');
-      const response = await fetch(`http://localhost:5000/api/leagues/${leagueId}/leave`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerId: userId
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to leave league');
-      }
-      
-      setMessage(data.message || 'You have left the league successfully!');
-      fetchLeagues();
-      
-      // Clear selected league if it was the one left
-      if (selectedLeague && selectedLeague.leagueId === leagueId) {
-        setSelectedLeague(null);
-        setLeagueStandings([]);
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to leave league');
-      console.error('Error:', err);
-    } finally {
-      setIsLeaving(false);
+      setLoading(prev => ({ ...prev, actions: false }));
     }
   };
 
@@ -210,7 +170,7 @@ const LeagueManagement = ({ userId, username }) => {
       <div className="league-management-grid">
         <div className="leagues-panel">
           <h3>Available Leagues</h3>
-          {loading ? (
+          {loading.leagues ? (
             <div className="loading">Loading leagues...</div>
           ) : leagues.length === 0 ? (
             <p>No leagues available</p>
@@ -234,22 +194,13 @@ const LeagueManagement = ({ userId, username }) => {
                     </span>
                   </div>
                   <div className="league-actions">
-                    {!isInLeague(league) ? (
+                    {!isInLeague(league) && (
                       <button 
                         onClick={(e) => handleJoinLeague(league.leagueId, e)}
-                        disabled={isJoining}
+                        disabled={loading.actions}
                         className="btn join"
                       >
-                        {isJoining ? 'Joining...' : 'Join'}
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={(e) => handleLeaveLeague(league.leagueId, e)}
-                        disabled={isLeaving || isLeagueOwner(league)}
-                        className="btn leave"
-                        title={isLeagueOwner(league) ? "Owners can't leave, must transfer ownership first" : ""}
-                      >
-                        {isLeaving ? 'Leaving...' : 'Leave'}
+                        {loading.actions ? 'Joining...' : 'Join'}
                       </button>
                     )}
                   </div>
@@ -276,10 +227,10 @@ const LeagueManagement = ({ userId, username }) => {
               
               <button 
                 type="submit" 
-                disabled={isCreating}
+                disabled={loading.actions}
                 className="btn submit"
               >
-                {isCreating ? 'Creating...' : 'Create League'}
+                {loading.actions ? 'Creating...' : 'Create League'}
               </button>
             </form>
           </div>
@@ -301,31 +252,36 @@ const LeagueManagement = ({ userId, username }) => {
             </div>
             
             <h4>Current Standings</h4>
-            {leagueStandings.length > 0 ? (
-              <table className="standings-table">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Points</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leagueStandings.map((player, index) => (
-                    <tr 
-                      key={player.playerId}
-                      className={player.playerId === userId ? 'current-user' : ''}
-                    >
-                      <td>{index + 1}</td>
-                      <td>
-                        {player.playerName}
-                        {player.playerId === userId && ' (You)'}
-                      </td>
-                      <td>{player.points}</td>
+            {loading.standings ? (
+              <div className="loading">Loading standings...</div>
+            ) : leagueStandings.length > 0 ? (
+              <div className="standings-container">
+                <table className="standings-table">
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Player</th>
+                      <th>Points</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {leagueStandings.map((standing, index) => (
+                      <tr 
+                        key={standing.playerId}
+                        className={standing.playerId === userId ? 'current-user' : ''}
+                      >
+                        <td>{index + 1}</td>
+                        <td>
+                          {standing.playerName}
+                          {standing.playerId === userId && ' (You)'}
+                          {standing.playerId === selectedLeague.ownerId && ' 👑'}
+                        </td>
+                        <td>{standing.points?.toLocaleString() || '0'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               <p>No standings data available</p>
             )}
