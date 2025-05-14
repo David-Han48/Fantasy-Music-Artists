@@ -1,0 +1,633 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+h1, h2, h3, h4 {
+  margin-bottom: 1rem;
+  color: #212529;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.submit-button {
+  background-color: #4361ee;
+  color: white;
+  padding: 10px 16px;
+  font-size: 16px;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.submit-button:hover {
+  background-color: #3a56d4;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.loading {
+  text-align: center;
+  margin: 2rem 0;
+  color: #6c757d;
+}
+
+.create-account-container,
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.create-account-card,
+.login-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+.login-link,
+.create-account-link {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.login-link span,
+.create-account-link span {
+  color: #4361ee;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.actions-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.actions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #4361ee;
+  color: white;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logout-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tab-navigation {
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-navigation ul {
+  display: flex;
+  list-style: none;
+  padding: 0 2rem;
+}
+
+.tab-navigation li {
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.tab-navigation li.active {
+  border-bottom: 2px solid #4361ee;
+  color: #4361ee;
+  font-weight: 500;
+}
+
+.tab-navigation li:hover:not(.active) {
+  background-color: #f8f9fa;
+}
+
+.tab-content {
+  padding: 2rem;
+  flex: 1;
+}
+
+.player-list-container h2 {
+  margin-bottom: 1.5rem;
+}
+
+.player-list-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.player-list table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.player-list th,
+.player-list td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.player-list th {
+  background-color: #f8f9fa;
+  font-weight: 500;
+}
+
+.player-list tr:not(:last-child) {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.player-list tr.selected {
+  background-color: #e8f0fe;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.select-button {
+  background-color: #4361ee;
+  color: white;
+}
+
+.select-button:hover {
+  background-color: #3a56d4;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}
+
+.player-details {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.update-password-form {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.league-management-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.leagues-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.leagues-list {
+  list-style: none;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.leagues-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  cursor: pointer;
+}
+
+.leagues-list li:last-child {
+  border-bottom: none;
+}
+
+.leagues-list li.selected {
+  background-color: #e8f0fe;
+}
+
+.league-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.league-name {
+  font-weight: 500;
+}
+
+.player-count {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.league-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.join-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.join-button:hover {
+  background-color: #218838;
+}
+
+.leave-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.leave-button:hover {
+  background-color: #c82333;
+}
+
+.create-league-form {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.league-details {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.standings-table th,
+.standings-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.standings-table th {
+  background-color: #f8f9fa;
+  font-weight: 500;
+}
+
+.roster-management-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.rosters-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.rosters-list {
+  list-style: none;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rosters-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  cursor: pointer;
+}
+
+.rosters-list li:last-child {
+  border-bottom: none;
+}
+
+.rosters-list li.selected {
+  background-color: #e8f0fe;
+}
+
+.roster-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.roster-name {
+  font-weight: 500;
+}
+
+.roster-stats {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.create-roster-form {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.roster-details {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.roster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.roster-meta {
+  display: flex;
+  gap: 1rem;
+  color: #6c757d;
+}
+
+.artist-controls {
+  margin-bottom: 1.5rem;
+}
+
+.add-artist-button {
+  background-color: #4361ee;
+  color: white;
+}
+
+.add-artist-button:hover {
+  background-color: #3a56d4;
+}
+
+.artists-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.artists-table th,
+.artists-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.artists-table th {
+  background-color: #f8f9fa;
+  font-weight: 500;
+}
+
+.remove-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.remove-button:hover {
+  background-color: #c82333;
+}
+
+.artist-search-container {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.artist-search-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.budget-display {
+  color: #6c757d;
+}
+
+.budget-amount {
+  font-weight: 500;
+  color: #28a745;
+}
+
+.close-button {
+  background-color: transparent;
+  color: #6c757d;
+  font-size: 1.5rem;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.close-button:hover {
+  color: #343a40;
+}
+
+.search-form {
+  margin-bottom: 1.5rem;
+}
+
+.search-input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.search-button {
+  background-color: #4361ee;
+  color: white;
+}
+
+.search-button:hover {
+  background-color: #3a56d4;
+}
+
+.search-results {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.add-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.add-button:hover {
+  background-color: #218838;
+}
+
+.add-button.disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.add-button.disabled:hover {
+  transform: none;
+}
+
+@media (max-width: 992px) {
+  .player-list-grid,
+  .league-management-grid,
+  .roster-management-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .player-details,
+  .league-details,
+  .roster-details,
+  .artist-search-container {
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .tab-navigation ul {
+    padding: 0;
+  }
+  
+  .tab-navigation li {
+    padding: 1rem;
+    flex: 1;
+    text-align: center;
+  }
+  
+  .tab-content {
+    padding: 1rem;
+  }
+  
+  .action-buttons,
+  .league-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+.time-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.fast-forward-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.fast-forward-button:hover {
+  background-color: #45a049;
+}
+
+.fast-forward-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
